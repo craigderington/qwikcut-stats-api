@@ -3,7 +3,7 @@
 from flask import Flask, jsonify, abort, make_response, url_for
 from flask_restful import Api, Resource, reqparse, fields, marshal
 from flask_httpauth import HTTPBasicAuth
-import pypodbc
+import pyodbc
 
 app = Flask(__name__)
 api = Api(app)
@@ -12,7 +12,7 @@ auth = HTTPBasicAuth()
 
 @auth.get_password
 def get_password(username):
-    """ Simple text based authentication """
+    """ Simple text-based authentication """
     if username == 'qwikcutappstats':
         return 'thisispython'
     else:
@@ -29,9 +29,35 @@ def unauthorized():
     """
     return make_response(jsonify({'message': 'Unauthorized Access'}), 403)
 
+stats = [
+    {
+        'statid': 4001,
+        'playerid': 1234,
+        'playernumber': 42,
+        'goals': 2,
+        'assists': 6,
+        'saves': 0,
+        'grounders': 2,
+        'turnovers': 1,
+        'forcedturnovers': 0,
+        'penalties': 1
+    },
+    {
+        'statid': 4002,
+        'playerid': 1236,
+        'playernumber': 86,
+        'goals': 0,
+        'assists': 12,
+        'saves': 0,
+        'grounders': 3,
+        'turnovers': 0,
+        'forcedturnovers': 0,
+        'penalties': 2
+    }
+]
 
 stat_fields = {
-    'statid': field.Integer,
+    'statid': fields.Integer,
     'playerid': fields.Integer,
     'playernumber': fields.Integer,
     'goals': fields.Integer,
@@ -47,6 +73,12 @@ stat_fields = {
 
 
 class StatListAPI(Resource):
+    """
+    API Resource for listing all player stats from the database.
+    Provides the endpoint for creating new stats
+    :param:
+    :return json stats list for all players
+    """
     decorators = [auth.login_required]
 
     def __init__(self):
@@ -114,6 +146,12 @@ class StatListAPI(Resource):
 
 
 class StatAPI(Resource):
+    """
+    API Resource for retrieving, modifying, updating and deleting a single
+    player stat, by ID.
+    :param: statid
+    :return: player stat records by ID.
+    """
     decorators = [auth.login_required]
 
     def __init__(self):
@@ -171,13 +209,13 @@ class StatAPI(Resource):
         return {'stat': marshal(stat, stat_fields)}
 
     def delete(self, id):
-        stat  [stat for stat in stats if stat['statid'] == id]
+        stat = [stat for stat in stats if stat['statid'] == id]
         if len(stat) == 0:
             abort(404)
         stat.remove(stat[0])
         return {'result': True}
 
-
+# register the API resources and define endpoints
 api.add_resource(StatListAPI, '/api/v1.0/lacrosse/stats', endpoint='stats')
 api.add_resource(StatAPI, '/api/v1.0/lacrosse/stats/<int:statid>', endpoint='stat')
 
