@@ -51,15 +51,41 @@ class StatListAPI(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument()
-        self.reqparse.add_argument()
-        self.reqparse.add_argument()
-        self.reqparse.add_argument()
-        self.reqparse.add_argument()
-        self.reqparse.add_argument()
-        self.reqparse.add_argument()
-        self.reqparse.add_argument()
-        self.reqparse.add_argument()
+        self.reqparse.add_argument('statid', type=int, required=False,
+                                   help='The stat ID field is an auto-incrementing database field',
+                                   location='json')
+        self.reqparse.add_argument('playerid', type=int, required=False,
+                                   help='The player ID is used to map the playner names to the team rosters.',
+                                   location='json')
+        self.reqparse.add_argument('playernumber', type=int, required=True,
+                                   help='The player for which the game statistic is being recorded',
+                                   location='json')
+        self.reqparse.add_argument('goals', type=int, required=False,
+                                   help='The number of goals scored.',
+                                   location='json')
+        self.reqparse.add_argument('shots', type=int, required=False,
+                                   help='The number of shots taken.',
+                                   location='json')
+        self.reqparse.add_argument('assists', type=int, required=False,
+                                   help='The number of assists.',
+                                   location='json')
+        self.reqparse.add_argument('saves', type=int, required=False,
+                                   help='The number of saves.',
+                                   location='json')
+        self.reqparse.add_argument('grounders', type=int, required=False,
+                                   help='The number of grounders.',
+                                   location='json')
+        self.reqparse.add_argument('turnovers', type=int, required=False,
+                                   help='The number of turnovers.',
+                                   location='json')
+        self.reqparse.add_argument('forcedturnovers', type=int, required=False,
+                                   help='The number of forced turnovers.',
+                                   location='json')
+        self.reqparse.add_argument('penalties', type=int, required=False,
+                                   help='The number of penalties.',
+                                   location='json')
+        self.reqparse.add_argument('uri', type=str, required=False,
+                                   help='The full URL path of the stat.')
 
         super(StatListAPI, self).__init__()
 
@@ -92,25 +118,49 @@ class StatAPI(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument()
-        self.reqparse.add_argument()
-        self.reqparse.add_argument()
-        self.reqparse.add_argument()
-        self.reqparse.add_argument()
-        self.reqparse.add_argument()
-        self.reqparse.add_argument()
-        self.reqparse.add_argument()
-        self.reqparse.add_argument()
+        self.reqparse.add_argument('statid', type=int, required=False,
+                                   help='The stat ID field is an auto-incrementing database field',
+                                   location='json')
+        self.reqparse.add_argument('playerid', type=int, required=False,
+                                   help='The player ID is used to map the playner names to the team rosters.',
+                                   location='json')
+        self.reqparse.add_argument('playernumber', type=int, required=True,
+                                   help='The player for which the game statistic is being recorded',
+                                   location='json')
+        self.reqparse.add_argument('goals', type=int, required=False,
+                                   help='The number of goals scored.',
+                                   location='json')
+        self.reqparse.add_argument('shots', type=int, required=False,
+                                   help='The number of shots taken.',
+                                   location='json')
+        self.reqparse.add_argument('assists', type=int, required=False,
+                                   help='The number of assists.',
+                                   location='json')
+        self.reqparse.add_argument('saves', type=int, required=False,
+                                   help='The number of saves.',
+                                   location='json')
+        self.reqparse.add_argument('grounders', type=int, required=False,
+                                   help='The number of grounders.',
+                                   location='json')
+        self.reqparse.add_argument('turnovers', type=int, required=False,
+                                   help='The number of turnovers.',
+                                   location='json')
+        self.reqparse.add_argument('forcedturnovers', type=int, required=False,
+                                   help='The number of forced turnovers.',
+                                   location='json')
+        self.reqparse.add_argument('penalties', type=int, required=False,
+                                   help='The number of penalties.',
+                                   location='json')
         super(StatAPI, self).__init__()
 
     def get(self, id):
-        stat = [stat for stat in stats if stat['id'] == id]
+        stat = [stat for stat in stats if stat['statid'] == id]
         if len(stat) == 0:
             abort(404)
         return {'stat': marshal(stat[0], stat_fields)}
 
     def put(self, id):
-        stat = [stat for stat in stats if stat['id'] == id]
+        stat = [stat for stat in stats if stat['statid'] == id]
         if len(stat) == 0:
             abort(404)
         stat = stat[0]
@@ -121,7 +171,7 @@ class StatAPI(Resource):
         return {'stat': marshal(stat, stat_fields)}
 
     def delete(self, id):
-        stat  [stat for stat in stats if stat['id'] == id]
+        stat  [stat for stat in stats if stat['statid'] == id]
         if len(stat) == 0:
             abort(404)
         stat.remove(stat[0])
