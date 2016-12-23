@@ -6,7 +6,7 @@ class MyDB(object):
     _db_cur = None
 
     def __init__(self):
-        self._db_connection = pyodbc.connect('host', 'user', 'password', 'db')
+        self._db_connection = pyodbc.connect('DRIVER={FreeTDS};SERVER=i1l7fad5wi.database.windows.net;PORT=1433;DATABASE=qwikcutapp;UID=craigderington@i1l7fad5wi.database.windows.net;PWD=GoArmy9605!;TDS_Version=7.0')
         self._db_cur = self._db_connection.cursor()
 
     def query(self, query, params):

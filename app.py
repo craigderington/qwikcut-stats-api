@@ -4,17 +4,39 @@ from flask import Flask, jsonify, abort, make_response, url_for
 from flask_restful import Api, Resource, reqparse, fields, marshal
 from flask_httpauth import HTTPBasicAuth
 import pyodbc
+import json
+import config
+
 
 app = Flask(__name__)
 api = Api(app)
 auth = HTTPBasicAuth()
 
 
+class AzureSQLDatabase(object):
+    connection = None
+    cursor = None
+
+    def __init__(self):
+        self.connection = pyodbc.connect(config.CONN_STRING)
+        self.cursor = self.connection.cursor()
+
+    def query(self, query, params):
+        return self.cursor.execute(query, params)
+
+    def commit(self):
+        return self.connection.commit()
+
+    def __del__(self):
+        self.connection.close()
+
+
 @auth.get_password
-def get_password(username):
+def get_password_and_key(username):
     """ Simple text-based authentication """
     if username == 'qwikcutappstats':
-        return 'thisispython'
+        api_key = 'ebd7a876-c8ad-11e6-9d9d-cec0c932ce01'
+        return api_key
     else:
         return None
 
@@ -22,39 +44,13 @@ def get_password(username):
 @auth.error_handler
 def unauthorized():
     """
-    Return a 403 instead of a 401 to prevent broswsers from displaying
+    Return a 403 instead of a 401 to prevent browsers from displaying
     the default auth dialog
     :param:
     :return: unauthorized message
     """
     return make_response(jsonify({'message': 'Unauthorized Access'}), 403)
 
-stats = [
-    {
-        'statid': 4001,
-        'playerid': 1234,
-        'playernumber': 42,
-        'goals': 2,
-        'assists': 6,
-        'saves': 0,
-        'grounders': 2,
-        'turnovers': 1,
-        'forcedturnovers': 0,
-        'penalties': 1
-    },
-    {
-        'statid': 4002,
-        'playerid': 1236,
-        'playernumber': 86,
-        'goals': 0,
-        'assists': 12,
-        'saves': 0,
-        'grounders': 3,
-        'turnovers': 0,
-        'forcedturnovers': 0,
-        'penalties': 2
-    }
-]
 
 stat_fields = {
     'statid': fields.Integer,
@@ -68,6 +64,10 @@ stat_fields = {
     'turnovers': fields.Integer,
     'forcedturnovers': fields.Integer,
     'penalties': fields.Integer,
+    'teamid': fields.Integer,
+    'gameid': fields.Integer,
+    'teamname': fields.String,
+    'statdate': fields.DateTime,
     'uri': fields.Url('stat')
 }
 
@@ -87,9 +87,9 @@ class StatListAPI(Resource):
                                    help='The stat ID field is an auto-incrementing database field',
                                    location='json')
         self.reqparse.add_argument('playerid', type=int, required=False,
-                                   help='The player ID is used to map the playner names to the team rosters.',
+                                   help='The player ID is used to map the player names to the team rosters.',
                                    location='json')
-        self.reqparse.add_argument('playernumber', type=int, required=True,
+        self.reqparse.add_argument('playernumber', type=int, required=False,
                                    help='The player for which the game statistic is being recorded',
                                    location='json')
         self.reqparse.add_argument('goals', type=int, required=False,
@@ -116,18 +116,41 @@ class StatListAPI(Resource):
         self.reqparse.add_argument('penalties', type=int, required=False,
                                    help='The number of penalties.',
                                    location='json')
+        self.reqparse.add_argument('teamid', type=int, required=False,
+                                   help='The team ID of the player.',
+                                   location='json')
+        self.reqparse.add_argument('gameid', type=int, required=False,
+                                   help='Game ID for which this stat is being recorded.',
+                                   location='json')
+        self.reqparse.add_argument('teamname', type=str, required=False,
+                                   help='The team name of the player stat',
+                                   location='json')
+        self.reqparse.add_argument('statdate', type=str, required=False,
+                                   help='The stat date.',
+                                   location='json')
         self.reqparse.add_argument('uri', type=str, required=False,
                                    help='The full URL path of the stat.')
 
         super(StatListAPI, self).__init__()
 
     def get(self):
+        sql = u"select statid, playerid, playernumber, goals, shots, assists, saves, grounders, turnovers, forcedturnovers, \
+                penalties, gameid, teamid, teamname, statdate from lacrosse_stats WHERE statdate > ?"
+        conn = AzureSQLDatabase()
+        params = '12-1-2016'
+        cursor = conn.query(sql, params)
+        columns = [column[0] for column in cursor.description]
+        stats = []
+        for row in cursor.fetchall():
+            stats.append(dict(zip(columns, row)))
+
         return {
-            'stats': [marshal(stat, stat_fields) for stat in stats]
+            'stats': marshal(stats, stat_fields)
         }
 
     def post(self):
         args = self.reqparse.parse_args()
+        stat = {}
         stat = {
             'statid': args['statid'],
             'playerid': args['playerid'],
@@ -139,10 +162,23 @@ class StatListAPI(Resource):
             'grounders': args['grounders'],
             'turnovers': args['turnovers'],
             'forcedturnovers': args['forcedturnovers'],
-            'penalties': args['penalties']
+            'penalties': args['penalties'],
+            'teamid': args['teamid'],
+            'gameid': args['gameid'],
+            'teamname': args['teamname'],
+            'statdate': args['statdate']
         }
-        stats.append(stat)
-        return {'stat': marshal(stat, stat_fields)}, 201
+
+        conn = AzureSQLDatabase()
+        conn.query("insert into lacrosse_stats(playerid, playernumber, goals, shots, assists, saves, grounders, \
+                    turnovers, forcedturnovers, penalties, teamid, gameid, teamname, statdate) \
+                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                   [stat['playerid'], stat['playernumber'], stat['goals'], stat['shots'], 23, 0, 0, 0, 0, 1, 321, 1323, 'Wesley Chappel', '12-23-2016 13:23:32'])
+        conn.commit()
+
+        return {
+            'stat': marshal(stat, stat_fields)
+        }, 201
 
 
 class StatAPI(Resource):
@@ -160,7 +196,7 @@ class StatAPI(Resource):
                                    help='The stat ID field is an auto-incrementing database field',
                                    location='json')
         self.reqparse.add_argument('playerid', type=int, required=False,
-                                   help='The player ID is used to map the playner names to the team rosters.',
+                                   help='The player ID is used to map the player names to the team rosters.',
                                    location='json')
         self.reqparse.add_argument('playernumber', type=int, required=True,
                                    help='The player for which the game statistic is being recorded',
@@ -220,4 +256,7 @@ api.add_resource(StatListAPI, '/api/v1.0/lacrosse/stats', endpoint='stats')
 api.add_resource(StatAPI, '/api/v1.0/lacrosse/stats/<int:statid>', endpoint='stat')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(
+        debug=config.DEBUG,
+        port=config.PORT
+    )
