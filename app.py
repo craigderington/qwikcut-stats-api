@@ -1,6 +1,6 @@
 #! flask/bin/python
 
-from flask import Flask, jsonify, abort, make_response, url_for
+from flask import Flask, request, jsonify, abort, make_response, url_for
 from flask_restful import Api, Resource, reqparse, fields, marshal
 from flask_httpauth import HTTPBasicAuth
 import pyodbc
@@ -84,50 +84,46 @@ class StatListAPI(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('statid', type=int, required=False,
-                                   help='The stat ID field is an auto-incrementing database field',
-                                   location='json')
+                                   help='The stat ID field is an auto-incrementing database field')
         self.reqparse.add_argument('playerid', type=int, required=False,
-                                   help='The player ID is used to map the player names to the team rosters.',
-                                   location='json')
+                                   help='The player ID is used to map the player names to the team rosters.')
         self.reqparse.add_argument('playernumber', type=int, required=False,
-                                   help='The player for which the game statistic is being recorded',
-                                   location='json')
+                                   help='The player for which the game statistic is being recorded.')
         self.reqparse.add_argument('goals', type=int, required=False,
-                                   help='The number of goals scored.',
-                                   location='json')
+                                   help='The number of goals scored.')
         self.reqparse.add_argument('shots', type=int, required=False,
                                    help='The number of shots taken.',
-                                   location='json')
+                                   location='form')
         self.reqparse.add_argument('assists', type=int, required=False,
                                    help='The number of assists.',
-                                   location='json')
+                                   location='form')
         self.reqparse.add_argument('saves', type=int, required=False,
                                    help='The number of saves.',
-                                   location='json')
+                                   location='form')
         self.reqparse.add_argument('grounders', type=int, required=False,
                                    help='The number of grounders.',
-                                   location='json')
+                                   location='form')
         self.reqparse.add_argument('turnovers', type=int, required=False,
                                    help='The number of turnovers.',
-                                   location='json')
+                                   location='form')
         self.reqparse.add_argument('forcedturnovers', type=int, required=False,
                                    help='The number of forced turnovers.',
-                                   location='json')
+                                   location='form')
         self.reqparse.add_argument('penalties', type=int, required=False,
                                    help='The number of penalties.',
-                                   location='json')
+                                   location='form')
         self.reqparse.add_argument('teamid', type=int, required=False,
                                    help='The team ID of the player.',
-                                   location='json')
+                                   location='form')
         self.reqparse.add_argument('gameid', type=int, required=False,
                                    help='Game ID for which this stat is being recorded.',
-                                   location='json')
+                                   location='form')
         self.reqparse.add_argument('teamname', type=str, required=False,
                                    help='The team name of the player stat',
-                                   location='json')
+                                   location='form')
         self.reqparse.add_argument('statdate', type=str, required=False,
                                    help='The stat date.',
-                                   location='json')
+                                   location='form')
         self.reqparse.add_argument('uri', type=str, required=False,
                                    help='The full URL path of the stat.')
 
@@ -150,23 +146,29 @@ class StatListAPI(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        stat = {}
+        data = request.get_json()
+        stat = []
+
+        for key, value in data.items():
+            stat.append(dict(zip(key, value)))
+
+        """
         stat = {
-            'statid': args['statid'],
-            'playerid': args['playerid'],
-            'playernumber': args['playernumber'],
-            'goals': args['goals'],
-            'shots': args['shots'],
-            'assists': args['assists'],
-            'saves': args['saves'],
-            'grounders': args['grounders'],
-            'turnovers': args['turnovers'],
-            'forcedturnovers': args['forcedturnovers'],
-            'penalties': args['penalties'],
-            'teamid': args['teamid'],
-            'gameid': args['gameid'],
-            'teamname': args['teamname'],
-            'statdate': args['statdate']
+            'statid': data['statid'],
+            'playerid': data['playerid'],
+            'playernumber': data['playernumber'],
+            'goals': data['goals'],
+            'shots': data['shots'],
+            'assists': data['assists'],
+            'saves': data['saves'],
+            'grounders': data['grounders'],
+            'turnovers': data['turnovers'],
+            'forcedturnovers': data['forcedturnovers'],
+            'penalties': data['penalties'],
+            'teamid': data['teamid'],
+            'gameid': data['gameid'],
+            'teamname': data['teamname'],
+            'statdate': data['statdate']
         }
 
         conn = AzureSQLDatabase()
@@ -180,6 +182,9 @@ class StatListAPI(Resource):
             'stat': marshal(stat, stat_fields)
         }, 201
 
+        """
+
+        return {'stat': stat}, 200
 
 class StatAPI(Resource):
     """
@@ -194,37 +199,37 @@ class StatAPI(Resource):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('statid', type=int, required=False,
                                    help='The stat ID field is an auto-incrementing database field',
-                                   location='json')
+                                   location='args')
         self.reqparse.add_argument('playerid', type=int, required=False,
                                    help='The player ID is used to map the player names to the team rosters.',
-                                   location='json')
+                                   location='args')
         self.reqparse.add_argument('playernumber', type=int, required=True,
                                    help='The player for which the game statistic is being recorded',
-                                   location='json')
+                                   location='args')
         self.reqparse.add_argument('goals', type=int, required=False,
                                    help='The number of goals scored.',
-                                   location='json')
+                                   location='args')
         self.reqparse.add_argument('shots', type=int, required=False,
                                    help='The number of shots taken.',
-                                   location='json')
+                                   location='args')
         self.reqparse.add_argument('assists', type=int, required=False,
                                    help='The number of assists.',
-                                   location='json')
+                                   location='args')
         self.reqparse.add_argument('saves', type=int, required=False,
                                    help='The number of saves.',
-                                   location='json')
+                                   location='args')
         self.reqparse.add_argument('grounders', type=int, required=False,
                                    help='The number of grounders.',
-                                   location='json')
+                                   location='args')
         self.reqparse.add_argument('turnovers', type=int, required=False,
                                    help='The number of turnovers.',
-                                   location='json')
+                                   location='args')
         self.reqparse.add_argument('forcedturnovers', type=int, required=False,
                                    help='The number of forced turnovers.',
-                                   location='json')
+                                   location='args')
         self.reqparse.add_argument('penalties', type=int, required=False,
                                    help='The number of penalties.',
-                                   location='json')
+                                   location='args')
         super(StatAPI, self).__init__()
 
     def get(self, id):
