@@ -3,6 +3,7 @@
 from flask import Flask, request, jsonify, abort, make_response, url_for
 from flask_restful import Api, Resource, reqparse, fields, marshal
 from flask_httpauth import HTTPBasicAuth
+from datetime import datetime
 import pyodbc
 import json
 import config
@@ -76,7 +77,8 @@ class StatListAPI(Resource):
     """
     API Resource for listing all player stats from the database.
     Provides the endpoint for creating new stats
-    :param:
+    :param: none
+    :type a json object
     :return json stats list for all players
     """
     decorators = [auth.login_required]
@@ -92,38 +94,29 @@ class StatListAPI(Resource):
         self.reqparse.add_argument('goals', type=int, required=False,
                                    help='The number of goals scored.')
         self.reqparse.add_argument('shots', type=int, required=False,
-                                   help='The number of shots taken.',
-                                   location='form')
+                                   help='The number of shots taken.')
         self.reqparse.add_argument('assists', type=int, required=False,
-                                   help='The number of assists.',
-                                   location='form')
+                                   help='The number of assists.')
         self.reqparse.add_argument('saves', type=int, required=False,
                                    help='The number of saves.',
                                    location='form')
         self.reqparse.add_argument('grounders', type=int, required=False,
-                                   help='The number of grounders.',
-                                   location='form')
+                                   help='The number of grounders.')
         self.reqparse.add_argument('turnovers', type=int, required=False,
-                                   help='The number of turnovers.',
-                                   location='form')
+                                   help='The number of turnovers.')
         self.reqparse.add_argument('forcedturnovers', type=int, required=False,
-                                   help='The number of forced turnovers.',
-                                   location='form')
+                                   help='The number of forced turnovers.')
         self.reqparse.add_argument('penalties', type=int, required=False,
                                    help='The number of penalties.',
                                    location='form')
         self.reqparse.add_argument('teamid', type=int, required=False,
-                                   help='The team ID of the player.',
-                                   location='form')
+                                   help='The team ID of the player.')
         self.reqparse.add_argument('gameid', type=int, required=False,
-                                   help='Game ID for which this stat is being recorded.',
-                                   location='form')
+                                   help='Game ID for which this stat is being recorded.')
         self.reqparse.add_argument('teamname', type=str, required=False,
-                                   help='The team name of the player stat',
-                                   location='form')
-        self.reqparse.add_argument('statdate', type=str, required=False,
-                                   help='The stat date.',
-                                   location='form')
+                                   help='The team name of the player stat')
+        self.reqparse.add_argument('statdate', type=str,
+                                   required=False, help='The stat date.')
         self.reqparse.add_argument('uri', type=str, required=False,
                                    help='The full URL path of the stat.')
 
@@ -149,10 +142,6 @@ class StatListAPI(Resource):
         data = request.get_json()
         stat = []
 
-        for key, value in data.items():
-            stat.append(dict(zip(key, value)))
-
-        """
         stat = {
             'statid': data['statid'],
             'playerid': data['playerid'],
@@ -175,16 +164,14 @@ class StatListAPI(Resource):
         conn.query("insert into lacrosse_stats(playerid, playernumber, goals, shots, assists, saves, grounders, \
                     turnovers, forcedturnovers, penalties, teamid, gameid, teamname, statdate) \
                     values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                   [stat['playerid'], stat['playernumber'], stat['goals'], stat['shots'], 23, 0, 0, 0, 0, 1, 321, 1323, 'Wesley Chappel', '12-23-2016 13:23:32'])
+                   [stat['playerid'], stat['playernumber'], stat['goals'], stat['shots'], stat['assists'], stat['saves'], stat['grounders'], stat['turnovers'], stat['forcedturnovers'], stat['penalties'], stat['teamid'], stat['gameid'], stat['teamname'], stat['statdate']])
+
         conn.commit()
 
         return {
-            'stat': marshal(stat, stat_fields)
+            'stat': stat
         }, 201
 
-        """
-
-        return {'stat': stat}, 200
 
 class StatAPI(Resource):
     """
