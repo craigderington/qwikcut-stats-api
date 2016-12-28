@@ -54,6 +54,7 @@ def unauthorized():
 
 
 stat_fields = {
+    'id': fields.Integer,
     'statid': fields.Integer,
     'playerid': fields.Integer,
     'playernumber': fields.Integer,
@@ -123,8 +124,9 @@ class StatListAPI(Resource):
         super(StatListAPI, self).__init__()
 
     def get(self):
-        sql = u"select statid, playerid, playernumber, goals, shots, assists, saves, grounders, turnovers, forcedturnovers, \
-                penalties, gameid, teamid, teamname, statdate from lacrosse_stats WHERE statdate > ?"
+        sql = u"select statid, statid as id, playerid, playernumber, goals, shots, assists, saves, grounders, " \
+              u"turnovers, forcedturnovers, penalties, gameid, teamid, teamname, statdate from lacrosse_stats " \
+              u"WHERE statdate > ?"
         conn = AzureSQLDatabase()
         params = '12-1-2016'
         cursor = conn.query(sql, params)
@@ -217,16 +219,38 @@ class StatAPI(Resource):
         self.reqparse.add_argument('penalties', type=int, required=False,
                                    help='The number of penalties.',
                                    location='args')
+        self.reqparse.add_argument('teamid', type=int, required=False,
+                                   help='The QC+ team ID of the player.')
+        self.reqparse.add_argument('gameid', type=int, required=False,
+                                   help='The QC+ game ID from the games table.')
+        self.reqparse.add_argument('teamname', type=str, required=True,
+                                   help='The player\'s team name.')
+        self.reqparse.add_argument('statdate', type=str, required=True,
+                                   help='The date time stamp of the statistic.')
+        self.reqparse.add_argument('uri', type='str', required=False,
+                                   help='The full URL path to the requested resource')
         super(StatAPI, self).__init__()
 
     def get(self, id):
-        stat = [stat for stat in stats if stat['statid'] == id]
-        if len(stat) == 0:
-            abort(404)
-        return {'stat': marshal(stat[0], stat_fields)}
+        conn = AzureSQLDatabase()
+        params = id
+        sql = u"select statid, statid as id, playerid, playernumber, goals, shots, assists, saves, grounders, turnovers, " \
+              u"forcedturnovers, penalties, teamid, gameid, teamname, statdate from lacrosse_stats where statid = ?"
+
+        cursor = conn.query(sql, params)
+        columns = [column[0] for column in cursor.description]
+        stat = []
+        for row in cursor.fetchall():
+            stat.append(dict(zip(columns, row)))
+
+        return {
+            'stat': marshal(stat, stat_fields)
+        }, 200
 
     def put(self, id):
-        stat = [stat for stat in stats if stat['statid'] == id]
+        params = id
+
+
         if len(stat) == 0:
             abort(404)
         stat = stat[0]
@@ -245,7 +269,7 @@ class StatAPI(Resource):
 
 # register the API resources and define endpoints
 api.add_resource(StatListAPI, '/api/v1.0/lacrosse/stats', endpoint='stats')
-api.add_resource(StatAPI, '/api/v1.0/lacrosse/stats/<int:statid>', endpoint='stat')
+api.add_resource(StatAPI, '/api/v1.0/lacrosse/stats/<int:id>', endpoint='stat')
 
 if __name__ == '__main__':
     app.run(
