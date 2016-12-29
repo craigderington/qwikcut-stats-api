@@ -248,24 +248,29 @@ class StatAPI(Resource):
         }, 200
 
     def put(self, id):
-        params = id
+        conn = AzureSQLDatabase()
+        data = request.get_json()
+        params = (data['playerid'], data['playernumber'], data['goals'], data['shots'], data['assists'], data['saves'], data['grounders'], data['turnovers'], data['forcedturnovers'], data['penalties'], data['teamid'], data['gameid'], data['teamname'], data['statdate'], id)
+        conn.query("update lacrosse_stats set playerid = ?, playernumber = ?, goals = ?, shots = ?, assists = ?, \
+                    saves = ?, grounders = ?, turnovers = ?, forcedturnovers = ?, penalties = ?, teamid = ?, \
+                    gameid = ?, teamname = ?, statdate = ? where statid = ?", params)
 
+        conn.commit()
 
-        if len(stat) == 0:
-            abort(404)
-        stat = stat[0]
-        args = self.reqparse.parse_args()
-        for k, v in args.items():
-            if v is not None:
-                stat[k] = v
-        return {'stat': marshal(stat, stat_fields)}
+        return {
+            'stat': data
+        }, 204
 
     def delete(self, id):
-        stat = [stat for stat in stats if stat['statid'] == id]
-        if len(stat) == 0:
-            abort(404)
-        stat.remove(stat[0])
-        return {'result': True}
+        conn = AzureSQLDatabase()
+        params = id
+        sql = u"delete from lacrosse_stats where statid = ?"
+        cursor = conn.query(sql, params)
+        conn.commit()
+
+        return {
+            'result': True
+        }, 204
 
 # register the API resources and define endpoints
 api.add_resource(StatListAPI, '/api/v1.0/lacrosse/stats', endpoint='stats')
