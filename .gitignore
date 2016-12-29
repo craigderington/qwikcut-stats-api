@@ -88,4 +88,9 @@ ENV/
 # Rope project settings
 .ropeproject
 
+# PyCharm
+.idea/
+
+# other files to ignore
 config.py
+assets/

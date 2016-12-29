@@ -86,6 +86,8 @@ class StatListAPI(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('id', type=int, required=False,
+                                   help='The API URL\'s ID of the stat.')
         self.reqparse.add_argument('statid', type=int, required=False,
                                    help='The stat ID field is an auto-incrementing database field')
         self.reqparse.add_argument('playerid', type=int, required=False,
@@ -186,6 +188,8 @@ class StatAPI(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('id', type=int, required=False,
+                                   help='The API URL\'s ID of the stat.')
         self.reqparse.add_argument('statid', type=int, required=False,
                                    help='The stat ID field is an auto-incrementing database field',
                                    location='args')
@@ -271,6 +275,7 @@ class StatAPI(Resource):
         return {
             'result': True
         }, 204
+
 
 # register the API resources and define endpoints
 api.add_resource(StatListAPI, '/api/v1.0/lacrosse/stats', endpoint='stats')
