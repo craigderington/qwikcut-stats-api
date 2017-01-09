@@ -23,6 +23,7 @@ where sport is the name of the sport in which the enduser is recording game stat
 
 ##### Lacrosse Fields
 
+```
 stat_fields = {
     'id': fields.Integer, // field for marshalling <int:statid>
     'statid': fields.Integer,  // auto-incrementing PK field from Azure DB 
@@ -42,6 +43,7 @@ stat_fields = {
     'statdate': fields.DateTime,
     'uri': fields.Url('stat') // auto-generated URI field
 }
+```
 
 ##### Lacrosse Endpoints
 
