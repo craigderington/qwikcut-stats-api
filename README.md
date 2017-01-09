@@ -58,11 +58,11 @@ stat_fields = {
 
 GET:
 
-curl -i -H --user username:password "Accept: application/json" -H "Content-Type: application/json" -X GET http://<IP>/api/v1.0/lacrosse/stats
+curl -i -H --user username:password "Accept: application/json" -H "Content-Type: application/json" -X GET http://server_ip/api/v1.0/lacrosse/stats
 
 POST:
 
-curl -i -H --user username:password "Accept: application/json" -H "Content-Type: application/json" -X POST -d 'payload={"stat": {"playerid": 0, "playernumber": "42", "goals": 2}}' http://<IP>/api/v1.0/lacrosse/stats/<int:statid>
+curl -i -H --user username:password "Accept: application/json" -H "Content-Type: application/json" -X POST -d 'payload={"stat": {"playerid": 0, "playernumber": "42", "goals": 2}}' http://server_ip/api/v1.0/lacrosse/stats/<int:statid>
 
 
 
