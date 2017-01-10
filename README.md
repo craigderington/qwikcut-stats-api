@@ -27,7 +27,7 @@ where sport is the name of the sport in which the enduser is recording game stat
 stat_fields = {
     'id': fields.Integer, // field for marshalling <int:statid>
     'statid': fields.Integer,  // auto-incrementing PK field from Azure DB 
-    'playerid': fields.Integer,
+    'playerid': fields.Integer, // set to 0 for default
     'playernumber': fields.Integer,
     'goals': fields.Integer,
     'shots': fields.Integer,
@@ -37,8 +37,8 @@ stat_fields = {
     'turnovers': fields.Integer,
     'forcedturnovers': fields.Integer,
     'penalties': fields.Integer,
-    'teamid': fields.Integer,
-    'gameid': fields.Integer,
+    'teamid': fields.Integer, // set to 0 for default
+    'gameid': fields.Integer, // set to 0 for default
     'teamname': fields.String,
     'statdate': fields.DateTime,
     'uri': fields.Url('stat') // auto-generated URI field
