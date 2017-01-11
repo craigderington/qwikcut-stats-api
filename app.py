@@ -126,55 +126,63 @@ class StatListAPI(Resource):
         super(StatListAPI, self).__init__()
 
     def get(self):
-        sql = u"select statid, statid as id, playerid, playernumber, goals, shots, assists, saves, grounders, " \
-              u"turnovers, forcedturnovers, penalties, gameid, teamid, teamname, statdate from lacrosse_stats " \
-              u"WHERE statdate > ?"
-        conn = AzureSQLDatabase()
-        params = '12-1-2016'
-        cursor = conn.query(sql, params)
-        columns = [column[0] for column in cursor.description]
-        stats = []
-        for row in cursor.fetchall():
-            stats.append(dict(zip(columns, row)))
+        try:
+            sql = u"select statid, statid as id, playerid, playernumber, goals, shots, assists, saves, grounders, " \
+                  u"turnovers, forcedturnovers, penalties, gameid, teamid, teamname, statdate from lacrosse_stats " \
+                  u"WHERE statdate > ?"
+            conn = AzureSQLDatabase()
+            params = '12-1-2016'
+            cursor = conn.query(sql, params)
+            columns = [column[0] for column in cursor.description]
+            stats = []
+            for row in cursor.fetchall():
+                stats.append(dict(zip(columns, row)))
 
-        return {
-            'stats': marshal(stats, stat_fields)
-        }
+            return {
+                'stats': marshal(stats, stat_fields)
+            }
+
+        except Exception as e:
+            return {'error': str(e)}
 
     def post(self):
-        args = self.reqparse.parse_args()
-        data = request.get_json()
-        stat = []
+        try:
+            args = self.reqparse.parse_args()
+            data = request.get_json()
+            stat = []
 
-        stat = {
-            'statid': data['statid'],
-            'playerid': data['playerid'],
-            'playernumber': data['playernumber'],
-            'goals': data['goals'],
-            'shots': data['shots'],
-            'assists': data['assists'],
-            'saves': data['saves'],
-            'grounders': data['grounders'],
-            'turnovers': data['turnovers'],
-            'forcedturnovers': data['forcedturnovers'],
-            'penalties': data['penalties'],
-            'teamid': data['teamid'],
-            'gameid': data['gameid'],
-            'teamname': data['teamname'],
-            'statdate': data['statdate']
-        }
+            stat = {
+                'statid': data['statid'],
+                'playerid': data['playerid'],
+                'playernumber': data['playernumber'],
+                'goals': data['goals'],
+                'shots': data['shots'],
+                'assists': data['assists'],
+                'saves': data['saves'],
+                'grounders': data['grounders'],
+                'turnovers': data['turnovers'],
+                'forcedturnovers': data['forcedturnovers'],
+                'penalties': data['penalties'],
+                'teamid': data['teamid'],
+                'gameid': data['gameid'],
+                'teamname': data['teamname'],
+                'statdate': data['statdate']
+            }
 
-        conn = AzureSQLDatabase()
-        conn.query("insert into lacrosse_stats(playerid, playernumber, goals, shots, assists, saves, grounders, \
-                    turnovers, forcedturnovers, penalties, teamid, gameid, teamname, statdate) \
-                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                   [stat['playerid'], stat['playernumber'], stat['goals'], stat['shots'], stat['assists'], stat['saves'], stat['grounders'], stat['turnovers'], stat['forcedturnovers'], stat['penalties'], stat['teamid'], stat['gameid'], stat['teamname'], stat['statdate']])
+            conn = AzureSQLDatabase()
+            conn.query("insert into lacrosse_stats(playerid, playernumber, goals, shots, assists, saves, grounders, \
+                        turnovers, forcedturnovers, penalties, teamid, gameid, teamname, statdate) \
+                        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                       [stat['playerid'], stat['playernumber'], stat['goals'], stat['shots'], stat['assists'], stat['saves'], stat['grounders'], stat['turnovers'], stat['forcedturnovers'], stat['penalties'], stat['teamid'], stat['gameid'], stat['teamname'], stat['statdate']])
 
-        conn.commit()
+            conn.commit()
 
-        return {
-            'stat': stat
-        }, 201
+            return {
+                'stat': stat
+            }, 201
+
+        except Exception as e:
+            return {'error': str(e)}
 
 
 class StatAPI(Resource):
@@ -236,45 +244,57 @@ class StatAPI(Resource):
         super(StatAPI, self).__init__()
 
     def get(self, id):
-        conn = AzureSQLDatabase()
-        params = id
-        sql = u"select statid, statid as id, playerid, playernumber, goals, shots, assists, saves, grounders, turnovers, " \
-              u"forcedturnovers, penalties, teamid, gameid, teamname, statdate from lacrosse_stats where statid = ?"
+        try:
+            conn = AzureSQLDatabase()
+            params = id
+            sql = u"select statid, statid as id, playerid, playernumber, goals, shots, assists, saves, grounders, turnovers, " \
+                  u"forcedturnovers, penalties, teamid, gameid, teamname, statdate from lacrosse_stats where statid = ?"
 
-        cursor = conn.query(sql, params)
-        columns = [column[0] for column in cursor.description]
-        stat = []
-        for row in cursor.fetchall():
-            stat.append(dict(zip(columns, row)))
+            cursor = conn.query(sql, params)
+            columns = [column[0] for column in cursor.description]
+            stat = []
+            for row in cursor.fetchall():
+                stat.append(dict(zip(columns, row)))
 
-        return {
-            'stat': marshal(stat, stat_fields)
-        }, 200
+            return {
+                'stat': marshal(stat, stat_fields)
+            }, 200
+
+        except Exception as e:
+            return {'error': str(e)}
 
     def put(self, id):
-        conn = AzureSQLDatabase()
-        data = request.get_json()
-        params = (data['playerid'], data['playernumber'], data['goals'], data['shots'], data['assists'], data['saves'], data['grounders'], data['turnovers'], data['forcedturnovers'], data['penalties'], data['teamid'], data['gameid'], data['teamname'], data['statdate'], id)
-        conn.query("update lacrosse_stats set playerid = ?, playernumber = ?, goals = ?, shots = ?, assists = ?, \
-                    saves = ?, grounders = ?, turnovers = ?, forcedturnovers = ?, penalties = ?, teamid = ?, \
-                    gameid = ?, teamname = ?, statdate = ? where statid = ?", params)
+        try:
+            conn = AzureSQLDatabase()
+            data = request.get_json()
+            params = (data['playerid'], data['playernumber'], data['goals'], data['shots'], data['assists'], data['saves'], data['grounders'], data['turnovers'], data['forcedturnovers'], data['penalties'], data['teamid'], data['gameid'], data['teamname'], data['statdate'], id)
+            conn.query("update lacrosse_stats set playerid = ?, playernumber = ?, goals = ?, shots = ?, assists = ?, \
+                        saves = ?, grounders = ?, turnovers = ?, forcedturnovers = ?, penalties = ?, teamid = ?, \
+                        gameid = ?, teamname = ?, statdate = ? where statid = ?", params)
 
-        conn.commit()
+            conn.commit()
 
-        return {
-            'stat': data
-        }, 204
+            return {
+                'stat': data
+            }, 204
+
+        except Exception as e:
+            return {'error': str(e)}
 
     def delete(self, id):
-        conn = AzureSQLDatabase()
-        params = id
-        sql = u"delete from lacrosse_stats where statid = ?"
-        cursor = conn.query(sql, params)
-        conn.commit()
+        try:
+            conn = AzureSQLDatabase()
+            params = id
+            sql = u"delete from lacrosse_stats where statid = ?"
+            cursor = conn.query(sql, params)
+            conn.commit()
 
-        return {
-            'result': True
-        }, 204
+            return {
+                'result': True
+            }, 204
+
+        except Exception as e:
+            return {'error': str(e)}
 
 
 # register the API resources and define endpoints
