@@ -85,7 +85,11 @@ curl -i -H --user username:password "Accept: application/json" -H "Content-Type:
 
 POST:
 
-curl -i -H --user username:password "Accept: application/json" -H "Content-Type: application/json" -X POST -d 'payload={"stat": {"playerid": 0, "playernumber": "42", "goals": 2}}' http://server_ip/api/v1.0/lacrosse/stats/<int:statid>
+curl -i -H --user username:password "Accept: application/json" -H "Content-Type: application/json" -X POST -d 'payload={"playerid": 0, "playernumber": "42", "goals": 2, "remaining fields": 23}' http://server_ip/api/v1.0/lacrosse/stats
+
+GET <int:statid>
+
+curl -i -H --user username:password "Accept: application/json" -H "Content-Type: application/json" -X GET http://server_ip/api/v1.0/lacrosse/stats/26
 
 
 
