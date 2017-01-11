@@ -1,7 +1,7 @@
 import pyodbc
 
 # define the connection
-connection = pyodbc.connect('DRIVER={FreeTDS};SERVER=i1l7fad5wi.database.windows.net;PORT=1433;DATABASE=qwikcutapp;UID=craigderington@i1l7fad5wi.database.windows.net;PWD=GoArmy9605!;TDS_Version=7.0')
+connection = pyodbc.connect('DRIVER={FreeTDS};SERVER=i1l7fad5wi.database.windows.net;PORT=1433;DATABASE=qwikcutapp;UID=<user>;PWD=<pass>;TDS_Version=7.0')
 
 # set up our db cursor
 cursor = connection.cursor()
