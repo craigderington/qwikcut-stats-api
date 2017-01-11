@@ -45,6 +45,29 @@ stat_fields = {
 }
 ```
 
+##### JSON Data format for POST:  Example
+
+```
+{
+    "id": 0,
+    "statid": 0,
+    "playerid": 2434,
+    "playernumber": 36,
+    "goals": 2,
+    "shots": 6,
+    "assists": 0,
+    "saves": 0,
+    "grounders": 3,
+    "turnovers": 0,
+    "forcedturnovers": 0,
+    "penalties": 2,
+    "teamid": 1190,
+    "gameid": 1634,
+    "teamname": "Clemson Tigers",
+    "statdate": "2017-01-10 09:30:45"
+}
+```
+
 ##### Lacrosse Endpoints
 
 * GET ['/api/v1.0/lacrosse/stats']
