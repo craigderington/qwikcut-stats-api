@@ -70,6 +70,8 @@ stat_fields = {
     'gameid': fields.Integer,
     'teamname': fields.String,
     'statdate': fields.DateTime,
+    'userid': fields.Integer,
+    'deviceid': fields.String,
     'uri': fields.Url('stat')
 }
 
@@ -120,6 +122,10 @@ class StatListAPI(Resource):
                                    help='The team name of the player stat')
         self.reqparse.add_argument('statdate', type=str,
                                    required=False, help='The stat date.')
+        self.reqparse.add_argument('userid', type=int, required=False,
+                                   help='The user ID of the logged in user.')
+        self.reqparse.add_argument('deviceid', type=str, required=False,
+                                   help='The unique device ID')
         self.reqparse.add_argument('uri', type=str, required=False,
                                    help='The full URL path of the stat.')
 
@@ -166,14 +172,16 @@ class StatListAPI(Resource):
                 'teamid': data['teamid'],
                 'gameid': data['gameid'],
                 'teamname': data['teamname'],
-                'statdate': data['statdate']
+                'statdate': data['statdate'],
+                'userid': data['userid'],
+                'deviceid': data['deviceid']
             }
 
             conn = AzureSQLDatabase()
             conn.query("insert into lacrosse_stats(playerid, playernumber, goals, shots, assists, saves, grounders, \
-                        turnovers, forcedturnovers, penalties, teamid, gameid, teamname, statdate) \
-                        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                       [stat['playerid'], stat['playernumber'], stat['goals'], stat['shots'], stat['assists'], stat['saves'], stat['grounders'], stat['turnovers'], stat['forcedturnovers'], stat['penalties'], stat['teamid'], stat['gameid'], stat['teamname'], stat['statdate']])
+                        turnovers, forcedturnovers, penalties, teamid, gameid, teamname, statdate, userid, deviceid) \
+                        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                       [stat['playerid'], stat['playernumber'], stat['goals'], stat['shots'], stat['assists'], stat['saves'], stat['grounders'], stat['turnovers'], stat['forcedturnovers'], stat['penalties'], stat['teamid'], stat['gameid'], stat['teamname'], stat['statdate'], stat['userid'], stat['deviceid']])
 
             conn.commit()
 
