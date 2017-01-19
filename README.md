@@ -26,7 +26,8 @@ where sport is the name of the sport in which the enduser is recording game stat
 ```
 stat_fields = {
     'id': fields.Integer, // field for marshalling <int:statid>
-    'statid': fields.Integer,  // auto-incrementing PK field from Azure DB 
+    'statid': fields.Integer,  // auto-incrementing PK field from Azure DB
+    'userid': fields.Integer, // set to unique user id
     'playerid': fields.Integer, // set to 0 for default
     'playernumber': fields.Integer,
     'goals': fields.Integer,
@@ -41,6 +42,7 @@ stat_fields = {
     'gameid': fields.Integer, // set to 0 for default
     'teamname': fields.String,
     'statdate': fields.DateTime,
+    'deviceid': fields.String,
     'uri': fields.Url('stat') // auto-generated URI field
 }
 ```
@@ -64,7 +66,9 @@ stat_fields = {
     "teamid": 1190,
     "gameid": 1634,
     "teamname": "Clemson Tigers",
-    "statdate": "2017-01-10 09:30:45"
+    "statdate": "2017-01-10 09:30:45",
+    "userid": 7654,
+    "deviceid": "4aec0906-d9b9-47d6-842d-bcd998e665d8"
 }
 ```
 
