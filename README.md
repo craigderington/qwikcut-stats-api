@@ -93,7 +93,15 @@ stat_fields = {
 * GET ['/api/v1.0/index']
 * GET ['/api/v1.0/logout']
 
-Example:  POST <username> and <password> to http://..../api/v1.0/login
+Example:  POST to http://.../api/v1.0/login
+
+```
+form_vars = {
+   "username": username, 
+   "password": password
+}
+```
+
 Upon successful login, returns username, user ID and team name
 
 ##### Usage Examples
