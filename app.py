@@ -1,17 +1,24 @@
 #! flask/bin/python
 
-from flask import Flask, request, jsonify, abort, make_response, url_for
+from flask import Flask, session, request, redirect, jsonify, abort, escape, make_response, url_for, \
+    render_template, flash
 from flask_restful import Api, Resource, reqparse, fields, marshal
 from flask_httpauth import HTTPBasicAuth
 from datetime import datetime
 import pyodbc
 import json
+from hashlib import sha384
 import config
 
 
 app = Flask(__name__)
 api = Api(app)
 auth = HTTPBasicAuth()
+app.secret_key = config.SECRET_KEY
+
+
+class ServerError(Exception):
+    pass
 
 
 class AzureSQLDatabase(object):
@@ -30,6 +37,71 @@ class AzureSQLDatabase(object):
 
     def __del__(self):
         self.connection.close()
+
+
+@app.route('/api/v1.0/index')
+def index():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    context = {
+        "username_session": escape(session['username']).capitalize(),
+        "userid": session['userid'],
+        "teamname": session['teamname']
+    }
+
+    return render_template('index.html', context=context)
+
+
+@app.route('/api/v1.0/login', methods=['GET', 'POST'])
+def login():
+    if 'username' in session:
+        return redirect(url_for('index'))
+
+    error = None
+    try:
+        if request.method == 'POST':
+            username_form = request.form['username']
+            conn = AzureSQLDatabase()
+            params = username_form
+            sql = "select count(1) from users where username = ?;"
+            cursor = conn.query(sql, params)
+
+            if not cursor.fetchone()[0]:
+                raise ServerError('Invalid Username!')
+
+            password_form = request.form['password']
+            params2 = password_form
+            sql2 = "select password, userid, teamname from users where username = ?;"
+            cursor2 = conn.query(sql2, params)
+
+            for row in cursor2.fetchall():
+                if sha384(password_form).hexdigest().upper() == row[0]:
+                    session['username'] = request.form['username']
+                    session['userid'] = row[1]
+                    session['teamname'] = row[2]
+                    return redirect(url_for('index'))
+
+            raise ServerError('Invalid Password!')
+    except ServerError as e:
+        error = str(e)
+
+    # the code below is executed if the request method
+    # was GET or the credentials were invalid
+    return render_template('login.html', error=error)
+
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    session.pop('userid', None)
+    session.pop('teamname', None)
+    return redirect(url_for('index'))
+
+
+@app.route('/forgot')
+def forgot_password():
+    return render_template('forgot.html', username=None)
 
 
 @auth.get_password
