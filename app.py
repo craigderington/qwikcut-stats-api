@@ -91,7 +91,7 @@ def login():
     return render_template('login.html', error=error)
 
 
-@app.route('/logout')
+@app.route('/api/v1.0/logout')
 def logout():
     session.pop('username', None)
     session.pop('userid', None)
@@ -99,7 +99,7 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route('/forgot')
+@app.route('/api/v1.0/forgot')
 def forgot_password():
     return render_template('forgot.html', username=None)
 
