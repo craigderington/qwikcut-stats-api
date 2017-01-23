@@ -18,6 +18,10 @@ Interface to be used by the QwikCut Stats Android app.
 * GET ['/api/version/sport/stats/<int:statid>']
 * PATCH ['/api/version/sport/stats/<int:statid>]'
 * PUT ['/api/version/sport/stats/<int:statid>']
+* GET ['/api/version/login']
+* POST ['/api/version/login']
+* GET ['/api/version/index']
+* GET ['api/version/logout']
 
 where sport is the name of the sport in which the enduser is recording game statistics.
 
@@ -80,6 +84,17 @@ stat_fields = {
 * GET ['/api/v1.0/lacrosse/stats/<int:statid>']
 * PATCH ['/api/v1.0/lacrosse/stats/<int:statid>]'
 * PUT ['/api/v1.0/lacrosse/stats/<int:statid>']
+
+
+##### API/App - Authentication Enpoints
+
+* GET ['/api/v1.0/login']
+* POST ['/api/v1.0/login']
+* GET ['/api/v1.0/index']
+* GET ['/api/v1.0/logout']
+
+Example:  POST <username> and <password> to http://..../api/v1.0/login
+Upon successful login, returns username, user ID and team name
 
 ##### Usage Examples
 
