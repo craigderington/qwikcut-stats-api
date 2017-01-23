@@ -86,7 +86,7 @@ stat_fields = {
 * PUT ['/api/v1.0/lacrosse/stats/<int:statid>']
 
 
-##### API/App - Authentication Enpoints
+##### API/App - Authentication Endpoints
 
 * GET ['/api/v1.0/login']
 * POST ['/api/v1.0/login']
