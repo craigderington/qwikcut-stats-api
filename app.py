@@ -205,9 +205,10 @@ class StatListAPI(Resource):
 
     def get(self):
         try:
-            sql = u"select statid, statid as id, playerid, playernumber, goals, shots, assists, saves, grounders, " \
-                  u"turnovers, forcedturnovers, penalties, gameid, teamid, teamname, statdate from lacrosse_stats " \
-                  u"WHERE statdate > ?"
+            sql = u"select statid, statid as id, playerid, playernumber, goals, shots, assists, " \
+                  u"saves, grounders, turnovers, forcedturnovers, penalties, gameid, teamid, teamname, " \
+                  u"statdate, userid from lacrosse_stats WHERE statdate > ?"
+
             conn = AzureSQLDatabase()
             params = '12-1-2016'
             cursor = conn.query(sql, params)
@@ -328,7 +329,7 @@ class StatAPI(Resource):
             conn = AzureSQLDatabase()
             params = id
             sql = u"select statid, statid as id, playerid, playernumber, goals, shots, assists, saves, grounders, turnovers, " \
-                  u"forcedturnovers, penalties, teamid, gameid, teamname, statdate from lacrosse_stats where statid = ?"
+                  u"forcedturnovers, penalties, teamid, gameid, teamname, statdate, userid from lacrosse_stats where statid = ?"
 
             cursor = conn.query(sql, params)
             columns = [column[0] for column in cursor.description]
