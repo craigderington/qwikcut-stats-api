@@ -4,6 +4,33 @@ A RESTful API for QwikCut Sports Statistics Tracking
 This backend database API is designed in Flask as a simple, lightweight Application Programming
 Interface to be used by the QwikCut Stats Android app.
 
+### Installation
+First, your machine needs to run python. 
+Make sure you have python installed on your machine. Type `python` to the command line. If it prints something like "Python 2.7.12 blah blah", you have python installed.
+
+Second, you need to install some libraries to this local server.
+I recommend using the tool called "pip." You can install the tool from this [link](https://pip.pypa.io/en/stable/installing/).
+After you install "pip", open "requirements.txt" located under the root of this project. 
+Install the library by typing "pip install EACH_LINE_IN_REQUIREMENTS.TXT." If everything is successfully loaded, you will see "Successfully installed" at the end of the install process.
+
+There is a troubleshooting section in this document. Please refer to that section if you face any problem. If your problem is not found in the section, please ask for help or google. After you solve your issue, please add the issue and your solution to troubleshooting section.
+
+Third, you need to create `config.py` locally that stores DB connection setting.
+Create a file called `config.py` and write these information. 
+
+
+### Trouble shooting
+import pyodbc doesn’t work
+
+error generates
+ImportError: dlopen(/Users/koheiarai/anaconda/lib/python2.7/site-packages/pyodbc.so, 2): Library not loaded: /usr/local/opt/unixodbc/lib/libodbc.2.dylib
+  Referenced from: /Users/koheiarai/anaconda/lib/python2.7/site-packages/pyodbc.so
+  Reason: image not found
+
+solution: install unixodbc
+https://github.com/mkleehammer/pyodbc/issues/87
+
+
 ##### Resources
 
 * StatListAPI
@@ -119,9 +146,7 @@ GET <int:statid>
 curl -i -H --user username:password "Accept: application/json" -H "Content-Type: application/json" -X GET http://server_ip/api/v1.0/lacrosse/stats/26
 
 
-
-
-
+##### Usage Examples
 
 
 
