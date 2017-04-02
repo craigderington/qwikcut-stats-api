@@ -17,10 +17,11 @@ There is a troubleshooting section in this document. Please refer to that sectio
 
 Third, you need to create `config.py` locally that stores DB connection setting.
 Create a file called `config.py` and write these information. 
-
+To connect to Azure database, you need to install extra library. Here is a [link](https://docs.microsoft.com/en-us/azure/sql-database/sql-database-connect-query-python#configure-development-environment) to the official support to connect to Azure database through Python. Please refer to this link to install necessary software. 
 
 ### Trouble shooting
-import pyodbc doesn’t work
+
+1. import pyodbc doesn’t work
 
 error generates
 ImportError: dlopen(/Users/koheiarai/anaconda/lib/python2.7/site-packages/pyodbc.so, 2): Library not loaded: /usr/local/opt/unixodbc/lib/libodbc.2.dylib
@@ -147,6 +148,8 @@ curl -i -H --user username:password "Accept: application/json" -H "Content-Type:
 
 
 ##### Usage Examples
+
+
 
 
 
