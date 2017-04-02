@@ -13,10 +13,10 @@ I recommend using the tool called "pip." You can install the tool from this [lin
 After you install "pip", open "requirements.txt" located under the root of this project. 
 Install the library by typing "pip install EACH_LINE_IN_REQUIREMENTS.TXT." If everything is successfully loaded, you will see "Successfully installed" at the end of the install process.
 
-There is a troubleshooting section in this document. Please refer to that section if you face any problem. If your problem is not found in the section, please ask for help or google. After you solve your issue, please add the issue and your solution to troubleshooting section.
+There is a troubleshooting section in this document. Please refer to that section if you face any problem. If your problem is not found in the section, please ask for help or google. After you solve your issue, please add the issue and your solution to the troubleshooting section.
 
 Third, you need to create `config.py` locally that stores DB connection setting.
-Create a file called `config.py` and write these information. 
+Create a file called `config.py` and write these information in this folder. 
 To connect to Azure database, you need to install extra library. Here is a [link](https://docs.microsoft.com/en-us/azure/sql-database/sql-database-connect-query-python#configure-development-environment) to the official support to connect to Azure database through Python. Please refer to this link to install necessary software. 
 
 ### Trouble shooting
