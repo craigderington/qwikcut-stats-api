@@ -40,11 +40,15 @@ error: command `i686-linux-gnu-gcc` failed with exit status 1.
 
 Install python-dev package by `sudo apt-get install python-dev`. If it succeeds, run `sudo pip install pyodbc==3.1.1`
 
-3. Cannot connect to database (Ubuntu)
+3. FreeTSD is not found (Mac)
 
-This trouble happens after your local server is up and running. When you go to http://127.0.0.1:5000/api/v1.0/login and valie email and password, it navigates to the error page. This is because your local server cannot establish valid connection with our Microsoft Azure setting.
+This trouble happens after your local server is up and running. When you try to login at http://127.0.0.1:5000/api/v1.0/, it prints error "'[unixODBC']'[Driver Manager']Can't open lib 'FreeTDS' : file not found". This is because your local server cannot establish valid connection with our Microsoft Azure setting.
 
-Please follow this [link](http://www.craigderington.me/design-an-api-with-flask-and-flask-restful-and-mysql/) **pyodbc** section.
+Please follow this [answer on stackoverflow](http://stackoverflow.com/a/27239553) for Mac and for [this link especially **pyodbc** section](http://www.craigderington.me/design-an-api-with-flask-and-flask-restful-and-mysql/) for Ubuntu.
+
+4. IP address is not set up for virtual box (Ubuntu)
+
+This happens when setting up a server on virtual box hosting ubuntu. Not solved yet.
 
 ##### Resources
 
