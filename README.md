@@ -21,7 +21,7 @@ To connect to Azure database, you need to install extra library. Here is a [link
 
 ### Trouble shooting
 
-1. import pyodbc doesn’t work
+1. import pyodbc doesn’t work (Mac)
 
 error generates
 ImportError: dlopen(/Users/koheiarai/anaconda/lib/python2.7/site-packages/pyodbc.so, 2): Library not loaded: /usr/local/opt/unixodbc/lib/libodbc.2.dylib
@@ -31,6 +31,20 @@ ImportError: dlopen(/Users/koheiarai/anaconda/lib/python2.7/site-packages/pyodbc
 solution: install unixodbc
 https://github.com/mkleehammer/pyodbc/issues/87
 
+2. import pyodbc doesn’t work (Ubuntu)
+
+This generates 
+
+'#include <Python.h> No file or directory found
+error: command `i686-linux-gnu-gcc` failed with exit status 1.
+
+Install python-dev package by `sudo apt-get install python-dev`. If it succeeds, run `sudo pip install pyodbc==3.1.1`
+
+3. Cannot connect to database (Ubuntu)
+
+This trouble happens after your local server is up and running. When you go to http://127.0.0.1:5000/api/v1.0/login and valie email and password, it navigates to the error page. This is because your local server cannot establish valid connection with our Microsoft Azure setting.
+
+Please follow this [link](http://www.craigderington.me/design-an-api-with-flask-and-flask-restful-and-mysql/) **pyodbc** section.
 
 ##### Resources
 
