@@ -103,15 +103,30 @@ def logout():
 def forgot_password():
     return render_template('forgot.html', username=None)
 
+@auth.hash_password
+def hash_password(password):
+    return sha384(password).hexdigest().upper()
 
 @auth.get_password
-def get_password_and_key(username):
-    """ Simple text-based authentication """
+def get_password(username):
+    conn = AzureSQLDatabase()
+    sql = "select password from users where username = ?;"
+    cursor = conn.query(sql, username)
+    row = cursor.fetchone();
+    
+    if not row:
+        return None
+    else:
+        return row.password
+    
+    """ Simple text-based authentication 
+        Save these for later use in the future
     if username == 'qwikcutappstats':
         api_key = 'ebd7a876-c8ad-11e6-9d9d-cec0c932ce01'
         return api_key
     else:
         return None
+    """
 
 
 @auth.error_handler
