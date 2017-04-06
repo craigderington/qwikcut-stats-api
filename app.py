@@ -392,10 +392,37 @@ class StatAPI(Resource):
         except Exception as e:
             return {'error': str(e)}
 
+class GameListAPI(Resource):
+    def __init__(self):
+        super(GameListAPI, self).__init__()
+        
+    def get(self, email):
+        try:
+            conn = AzureSQLDatabase()
+            # Get list of the game sorted by most upcoming to the future games
+             
+        except Exception as e:
+            return {'error': str(e)}
+
+class RosterListAPI(Resource):
+    def __init__(self):
+        super(RosterListAPI, self).__init__()
+        
+    def get(self, email):
+        try:
+            conn = AzureSQLDatabase()
+            # Get list of roster
+            
+        except Exception as e:
+            return {'error': str(e)}
+            
 
 # register the API resources and define endpoints
 api.add_resource(StatListAPI, '/api/v1.0/lacrosse/stats', endpoint='stats')
 api.add_resource(StatAPI, '/api/v1.0/lacrosse/stats/<int:id>', endpoint='stat')
+api.add_resource(GameListAPI, '/api/v1.0/games')
+api.add_resource(RosterListAPI, '/api/v1.0/roster')
+
 
 if __name__ == '__main__':
     app.run(
