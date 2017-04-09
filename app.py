@@ -31,6 +31,9 @@ class AzureSQLDatabase(object):
 
     def query(self, query, params):
         return self.cursor.execute(query, params)
+        
+    def execute(self, query):
+        return self.cursor.execute(query)
 
     def commit(self):
         return self.connection.commit()
@@ -103,30 +106,18 @@ def logout():
 def forgot_password():
     return render_template('forgot.html', username=None)
 
-@auth.hash_password
-def hash_password(password):
-    return sha384(password).hexdigest().upper()
+# @auth.hash_password
+# def hash_password(password):
+#     return sha384(password).hexdigest().upper()
 
 @auth.get_password
 def get_password(username):
-    conn = AzureSQLDatabase()
-    sql = "select password from users where username = ?;"
-    cursor = conn.query(sql, username)
-    row = cursor.fetchone();
-    
-    if not row:
-        return None
-    else:
-        return row.password
-    
-    """ Simple text-based authentication 
-        Save these for later use in the future
+    """ Simple text-based authentication """
     if username == 'qwikcutappstats':
         api_key = 'ebd7a876-c8ad-11e6-9d9d-cec0c932ce01'
         return api_key
     else:
         return None
-    """
 
 
 @auth.error_handler
@@ -392,14 +383,75 @@ class StatAPI(Resource):
         except Exception as e:
             return {'error': str(e)}
 
+# These properties are available for users.
+game_fields = {
+    'gameid': fields.Integer,
+    'confid': fields.Integer,
+    'fieldid': fields.Integer,
+    'hometeamid': fields.Integer,
+    'awayteamid': fields.Integer,
+    'gamedate': fields.DateTime,
+    'gamestart': fields.DateTime,
+    'gameend': fields.DateTime,
+    'gamestatus': fields.String,
+    'gameoutcome': fields.String,
+    'gamewinner': fields.Integer,
+    'gameseasonid': fields.Integer,
+    'vsid': fields.Integer,
+    'customgame': fields.Boolean
+}
+
 class GameListAPI(Resource):
     def __init__(self):
         super(GameListAPI, self).__init__()
         
-    def get(self, email):
+        decorators = []
+    
+    # Returns the list of games associated with given teamnames in ascending game start time. It returns both home and away games
+    def get(self, teamname):
         try:
             conn = AzureSQLDatabase()
-            # Get list of the game sorted by most upcoming to the future games
+            # Test team name: Kings High School
+            ''' You can retrieve the list of team names by removing this comments.
+            teamnameSql = "select teamname from teams"
+            cursor = conn.execute(teamnameSql)
+            for row in cursor.fetchall():
+                print row.teamname
+            '''
+            
+            # Get team id
+            teamidSql = "select teamid from teams where teamname = ?"
+            cursor = conn.query(teamidSql, teamname);
+            teamids = []
+            for row in cursor.fetchall():
+                teamids.append(row.teamid)
+            
+            # Handle no team ids are found
+            if len(teamids) == 0:
+                return {
+                    'error': 'No team is found'
+                }
+            
+            # Get games associated with retrieved team ids
+            # This placeholder code is retreived from http://stackoverflow.com/a/16732494
+            placeholders = ",".join("?" * len(teamids))
+            gamesSql = "select * from games where hometeamid IN (%s) OR awayteamid IN (%s) ORDER BY gamestart" % (placeholders, placeholders)
+            params = []
+            params.extend(teamids)
+            params.extend(teamids)
+            cursor = conn.query(gamesSql, params)
+
+            # Convert to array of game object
+            columns = [column[0] for column in cursor.description]
+            games = []
+            for row in cursor.fetchall():
+                zipped = zip(columns, row)
+                d = dict(zipped)
+                games.append(d)
+            
+            return {
+                'games': marshal(games, game_fields)
+            }, 200
              
         except Exception as e:
             return {'error': str(e)}
@@ -420,8 +472,8 @@ class RosterListAPI(Resource):
 # register the API resources and define endpoints
 api.add_resource(StatListAPI, '/api/v1.0/lacrosse/stats', endpoint='stats')
 api.add_resource(StatAPI, '/api/v1.0/lacrosse/stats/<int:id>', endpoint='stat')
-api.add_resource(GameListAPI, '/api/v1.0/games')
-api.add_resource(RosterListAPI, '/api/v1.0/roster')
+api.add_resource(GameListAPI, '/api/v1.0/games/<string:teamname>', endpoint='games')
+api.add_resource(RosterListAPI, '/api/v1.0/roster/<string:email>')
 
 
 if __name__ == '__main__':
