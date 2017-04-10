@@ -456,14 +456,57 @@ class GameListAPI(Resource):
         except Exception as e:
             return {'error': str(e)}
 
+roster_fields = {
+    'teamid': fields.Integer,
+    'playername': fields.String,
+    'playernumber': fields.Integer,
+    'playerposition': fields.String,
+    'playerstatus': fields.String
+}
+
 class RosterListAPI(Resource):
     def __init__(self):
         super(RosterListAPI, self).__init__()
         
-    def get(self, email):
+    def get(self, teamname):
         try:
             conn = AzureSQLDatabase()
+            # Use Apopka Blue Darters for testing
+            
+            # Get teamid
+            teamidSql = "select teamid from teams where teamname = ? "
+            cursor = conn.query(teamidSql, teamname)
+
+            teamids = []
+            for row in cursor.fetchall():
+                teamids.append(row.teamid)
+                
+            print teamids
+                
+            # Handle no team ids are found
+            if len(teamids) == 0:
+                return {
+                    'error': 'No team is found'
+                }
+            
             # Get list of roster
+            placeholders = ",".join("?" * len(teamids))
+            rosterSql = "select * from teamrosters where teamid IN (%s)" % placeholders
+            params = []
+            params.extend(teamids)
+            cursor = conn.query(rosterSql, params)
+            
+            # Convert array of roster
+            columns = [column[0] for column in cursor.description]
+            rosters = []
+            for row in cursor.fetchall():
+                zipped = zip(columns, row)
+                d = dict(zipped)
+                rosters.append(d)
+            
+            return {
+                'rosters': marshal(rosters, roster_fields)
+            }, 200
             
         except Exception as e:
             return {'error': str(e)}
@@ -473,7 +516,7 @@ class RosterListAPI(Resource):
 api.add_resource(StatListAPI, '/api/v1.0/lacrosse/stats', endpoint='stats')
 api.add_resource(StatAPI, '/api/v1.0/lacrosse/stats/<int:id>', endpoint='stat')
 api.add_resource(GameListAPI, '/api/v1.0/games/<string:teamname>', endpoint='games')
-api.add_resource(RosterListAPI, '/api/v1.0/roster/<string:email>')
+api.add_resource(RosterListAPI, '/api/v1.0/roster/<string:teamname>')
 
 
 if __name__ == '__main__':
