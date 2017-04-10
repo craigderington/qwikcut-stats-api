@@ -68,6 +68,8 @@ This happens when setting up a server on virtual box hosting ubuntu. Not solved 
 * POST ['/api/version/login']
 * GET ['/api/version/index']
 * GET ['api/version/logout']
+* GET ['/api/version/games/<string:teamname>']
+* GET ['/api/version/roster/<string:teamname>']
 
 where sport is the name of the sport in which the enduser is recording game statistics.
 
@@ -94,6 +96,41 @@ stat_fields = {
     'statdate': fields.DateTime,
     'deviceid': fields.String,
     'uri': fields.Url('stat') // auto-generated URI field
+}
+```
+
+#### Game fields
+Game endpoint returns the array of games associated with given teamname. Returned game contains these fields.
+
+```
+game_fields = {
+    'gameid': fields.Integer,
+    'confid': fields.Integer,
+    'fieldid': fields.Integer,
+    'hometeamid': fields.Integer,
+    'awayteamid': fields.Integer,
+    'gamedate': fields.DateTime,
+    'gamestart': fields.DateTime,
+    'gameend': fields.DateTime,
+    'gamestatus': fields.String,
+    'gameoutcome': fields.String,
+    'gamewinner': fields.Integer,
+    'gameseasonid': fields.Integer,
+    'vsid': fields.Integer,
+    'customgame': fields.Boolean
+}
+```
+
+#### Roster fields
+Roster endpoint returns the array of rosters associated with given teamname. Returned roster contains these fields.
+
+```
+roster_fields = {
+    'teamid': fields.Integer,
+    'playername': fields.String,
+    'playernumber': fields.Integer,
+    'playerposition': fields.String,
+    'playerstatus': fields.String
 }
 ```
 
@@ -152,6 +189,9 @@ Upon successful login, returns username, user ID and team name
 
 ##### Usage Examples
 
+NOTE
+Currently API only accepts calls from username qwikcutappstats. For password, please open `app.py` and get the string defined in `get_password` function. 
+
 GET:
 
 curl -i -H --user username:password "Accept: application/json" -H "Content-Type: application/json" -X GET http://server_ip/api/v1.0/lacrosse/stats
@@ -164,8 +204,6 @@ GET <int:statid>
 
 curl -i -H --user username:password "Accept: application/json" -H "Content-Type: application/json" -X GET http://server_ip/api/v1.0/lacrosse/stats/26
 
-
-##### Usage Examples
 
 
 
