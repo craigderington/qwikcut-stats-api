@@ -31,6 +31,9 @@ class AzureSQLDatabase(object):
 
     def query(self, query, params):
         return self.cursor.execute(query, params)
+        
+    def execute(self, query):
+        return self.cursor.execute(query)
 
     def commit(self):
         return self.connection.commit()
@@ -103,9 +106,12 @@ def logout():
 def forgot_password():
     return render_template('forgot.html', username=None)
 
+# @auth.hash_password
+# def hash_password(password):
+#     return sha384(password).hexdigest().upper()
 
 @auth.get_password
-def get_password_and_key(username):
+def get_password(username):
     """ Simple text-based authentication """
     if username == 'qwikcutappstats':
         api_key = 'ebd7a876-c8ad-11e6-9d9d-cec0c932ce01'
@@ -377,10 +383,123 @@ class StatAPI(Resource):
         except Exception as e:
             return {'error': str(e)}
 
+# These properties are available for users.
+game_fields = {
+    'gameid': fields.Integer,
+    'confid': fields.Integer,
+    'fieldid': fields.Integer,
+    'hometeamid': fields.Integer,
+    'awayteamid': fields.Integer,
+    'gamedate': fields.DateTime,
+    'gamestart': fields.DateTime,
+    'gameend': fields.DateTime,
+    'gamestatus': fields.String,
+    'gameoutcome': fields.String,
+    'gamewinner': fields.Integer,
+    'gameseasonid': fields.Integer,
+    'vsid': fields.Integer,
+    'customgame': fields.Boolean
+}
+
+class GameListAPI(Resource):
+    def __init__(self):
+        super(GameListAPI, self).__init__()
+        
+        decorators = []
+    
+    # Returns the list of games associated with given teamnames in ascending game start time. It returns both home and away games
+    def get(self, teamid):
+        try:
+            conn = AzureSQLDatabase()
+            # Use 1362 for test purpose. It is Kings High School
+            teamids = []
+            teamids.append(teamid)
+            
+            # Handle no team ids are found
+            if len(teamids) == 0:
+                return {
+                    'error': 'No team is found'
+                }
+            
+            # Get games associated with retrieved team ids
+            # This placeholder code is retreived from http://stackoverflow.com/a/16732494
+            placeholders = ",".join("?" * len(teamids))
+            sql2 = "select * from games where hometeamid in (%s) or awayteamid in (%s) order by gamestart" % (placeholders, placeholders)
+            params2 = []
+            params2.extend(teamids)
+            params2.extend(teamids)
+            cursor2 = conn.query(sql2, params2)
+
+            # Convert to array of game object
+            columns = [column[0] for column in cursor2.description]
+            games = []
+            for row in cursor2.fetchall():
+                zipped = zip(columns, row)
+                d = dict(zipped)
+                games.append(d)
+            
+            return {
+                'games': marshal(games, game_fields)
+            }, 200
+             
+        except Exception as e:
+            return {'error': str(e)}
+
+roster_fields = {
+    'teamid': fields.Integer,
+    'playername': fields.String,
+    'playernumber': fields.Integer,
+    'playerposition': fields.String,
+    'playerstatus': fields.String
+}
+
+class RosterListAPI(Resource):
+    def __init__(self):
+        super(RosterListAPI, self).__init__()
+        
+    def get(self, teamid):
+        try:
+            conn = AzureSQLDatabase()
+            # Use 1362 for test purpose. It is Kings High School
+            
+            teamids = []
+            teamids.append(teamid)
+                
+            # Handle no team ids are found
+            if len(teamids) == 0:
+                return {
+                    'error': 'No team is found'
+                }
+            
+            # Get list of roster
+            placeholders = ",".join("?" * len(teamids))
+            sql2 = "select * from teamrosters where teamid in (%s)" % placeholders
+            params2 = []
+            params2.extend(teamids)
+            cursor2 = conn.query(sql2, params2)
+            
+            # Convert array of roster
+            columns = [column[0] for column in cursor2.description]
+            rosters = []
+            for row in cursor2.fetchall():
+                zipped = zip(columns, row)
+                d = dict(zipped)
+                rosters.append(d)
+            
+            return {
+                'rosters': marshal(rosters, roster_fields)
+            }, 200
+            
+        except Exception as e:
+            return {'error': str(e)}
+            
 
 # register the API resources and define endpoints
 api.add_resource(StatListAPI, '/api/v1.0/lacrosse/stats', endpoint='stats')
 api.add_resource(StatAPI, '/api/v1.0/lacrosse/stats/<int:id>', endpoint='stat')
+api.add_resource(GameListAPI, '/api/v1.0/games/<string:teamid>', endpoint='games')
+api.add_resource(RosterListAPI, '/api/v1.0/roster/<string:teamid>')
+
 
 if __name__ == '__main__':
     app.run(

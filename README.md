@@ -4,6 +4,52 @@ A RESTful API for QwikCut Sports Statistics Tracking
 This backend database API is designed in Flask as a simple, lightweight Application Programming
 Interface to be used by the QwikCut Stats Android app.
 
+### Installation
+First, your machine needs to run python. 
+Make sure you have python installed on your machine. Type `python` to the command line. If it prints something like "Python 2.7.12 blah blah", you have python installed.
+
+Second, you need to install some libraries to this local server.
+I recommend using the tool called "pip." You can install the tool from this [link](https://pip.pypa.io/en/stable/installing/).
+After you install "pip", open "requirements.txt" located under the root of this project. 
+Install the library by typing "pip install EACH_LINE_IN_REQUIREMENTS.TXT." If everything is successfully loaded, you will see "Successfully installed" at the end of the install process.
+
+There is a troubleshooting section in this document. Please refer to that section if you face any problem. If your problem is not found in the section, please ask for help or google. After you solve your issue, please add the issue and your solution to the troubleshooting section.
+
+Third, you need to create `config.py` locally that stores DB connection setting.
+Create a file called `config.py` and write these information in this folder. 
+To connect to Azure database, you need to install extra library. Here is a [link](https://docs.microsoft.com/en-us/azure/sql-database/sql-database-connect-query-python#configure-development-environment) to the official support to connect to Azure database through Python. Please refer to this link to install necessary software. 
+
+### Trouble shooting
+
+1. import pyodbc doesn’t work (Mac)
+
+error generates
+ImportError: dlopen(/Users/koheiarai/anaconda/lib/python2.7/site-packages/pyodbc.so, 2): Library not loaded: /usr/local/opt/unixodbc/lib/libodbc.2.dylib
+  Referenced from: /Users/koheiarai/anaconda/lib/python2.7/site-packages/pyodbc.so
+  Reason: image not found
+
+solution: install unixodbc
+https://github.com/mkleehammer/pyodbc/issues/87
+
+2. import pyodbc doesn’t work (Ubuntu)
+
+This generates 
+
+'#include <Python.h> No file or directory found
+error: command `i686-linux-gnu-gcc` failed with exit status 1.
+
+Install python-dev package by `sudo apt-get install python-dev`. If it succeeds, run `sudo pip install pyodbc==3.1.1`
+
+3. FreeTSD is not found (Mac)
+
+This trouble happens after your local server is up and running. When you try to login at http://127.0.0.1:5000/api/v1.0/, it prints error "'[unixODBC']'[Driver Manager']Can't open lib 'FreeTDS' : file not found". This is because your local server cannot establish valid connection with our Microsoft Azure setting.
+
+Please follow this [answer on stackoverflow](http://stackoverflow.com/a/27239553) for Mac and for [this link especially **pyodbc** section](http://www.craigderington.me/design-an-api-with-flask-and-flask-restful-and-mysql/) for Ubuntu.
+
+4. IP address is not set up for virtual box (Ubuntu)
+
+This happens when setting up a server on virtual box hosting ubuntu. Not solved yet.
+
 ##### Resources
 
 * StatListAPI
@@ -22,6 +68,8 @@ Interface to be used by the QwikCut Stats Android app.
 * POST ['/api/version/login']
 * GET ['/api/version/index']
 * GET ['api/version/logout']
+* GET ['/api/version/games/<string:teamname>']
+* GET ['/api/version/roster/<string:teamname>']
 
 where sport is the name of the sport in which the enduser is recording game statistics.
 
@@ -48,6 +96,41 @@ stat_fields = {
     'statdate': fields.DateTime,
     'deviceid': fields.String,
     'uri': fields.Url('stat') // auto-generated URI field
+}
+```
+
+#### Game fields
+Game endpoint returns the array of games associated with given teamname. Returned game contains these fields.
+
+```
+game_fields = {
+    'gameid': fields.Integer,
+    'confid': fields.Integer,
+    'fieldid': fields.Integer,
+    'hometeamid': fields.Integer,
+    'awayteamid': fields.Integer,
+    'gamedate': fields.DateTime,
+    'gamestart': fields.DateTime,
+    'gameend': fields.DateTime,
+    'gamestatus': fields.String,
+    'gameoutcome': fields.String,
+    'gamewinner': fields.Integer,
+    'gameseasonid': fields.Integer,
+    'vsid': fields.Integer,
+    'customgame': fields.Boolean
+}
+```
+
+#### Roster fields
+Roster endpoint returns the array of rosters associated with given teamname. Returned roster contains these fields.
+
+```
+roster_fields = {
+    'teamid': fields.Integer,
+    'playername': fields.String,
+    'playernumber': fields.Integer,
+    'playerposition': fields.String,
+    'playerstatus': fields.String
 }
 ```
 
@@ -106,6 +189,9 @@ Upon successful login, returns username, user ID and team name
 
 ##### Usage Examples
 
+NOTE
+Currently API only accepts calls from username qwikcutappstats. For password, please open `app.py` and get the string defined in `get_password` function. 
+
 GET:
 
 curl -i -H --user username:password "Accept: application/json" -H "Content-Type: application/json" -X GET http://server_ip/api/v1.0/lacrosse/stats
@@ -117,8 +203,6 @@ curl -i -H --user username:password "Accept: application/json" -H "Content-Type:
 GET <int:statid>
 
 curl -i -H --user username:password "Accept: application/json" -H "Content-Type: application/json" -X GET http://server_ip/api/v1.0/lacrosse/stats/26
-
-
 
 
 
