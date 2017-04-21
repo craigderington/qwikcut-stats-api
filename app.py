@@ -408,24 +408,12 @@ class GameListAPI(Resource):
         decorators = []
     
     # Returns the list of games associated with given teamnames in ascending game start time. It returns both home and away games
-    def get(self, teamname):
+    def get(self, teamid):
         try:
             conn = AzureSQLDatabase()
-            # Test team name: Kings High School
-            ''' You can retrieve the list of team names by removing this comments.
-            teamnameSql = "select teamname from teams"
-            cursor = conn.execute(teamnameSql)
-            for row in cursor.fetchall():
-                print row.teamname
-            '''
-            
-            # Get team id
-            sql = "select teamid from teams where teamname = ?"
-            params = teamname
-            cursor = conn.query(sql, params);
+            # Use 1362 for test purpose. It is Kings High School
             teamids = []
-            for row in cursor.fetchall():
-                teamids.append(row.teamid)
+            teamids.append(teamid)
             
             # Handle no team ids are found
             if len(teamids) == 0:
@@ -469,19 +457,13 @@ class RosterListAPI(Resource):
     def __init__(self):
         super(RosterListAPI, self).__init__()
         
-    def get(self, teamname):
+    def get(self, teamid):
         try:
             conn = AzureSQLDatabase()
-            # Use Apopka Blue Darters for testing
+            # Use 1362 for test purpose. It is Kings High School
             
-            # Get teamid
-            sql = "select teamid from teams where teamname = ?"
-            params = teamname
-            cursor = conn.query(sql, params)
-
             teamids = []
-            for row in cursor.fetchall():
-                teamids.append(row.teamid)
+            teamids.append(teamid)
                 
             # Handle no team ids are found
             if len(teamids) == 0:
@@ -515,8 +497,8 @@ class RosterListAPI(Resource):
 # register the API resources and define endpoints
 api.add_resource(StatListAPI, '/api/v1.0/lacrosse/stats', endpoint='stats')
 api.add_resource(StatAPI, '/api/v1.0/lacrosse/stats/<int:id>', endpoint='stat')
-api.add_resource(GameListAPI, '/api/v1.0/games/<string:teamname>', endpoint='games')
-api.add_resource(RosterListAPI, '/api/v1.0/roster/<string:teamname>')
+api.add_resource(GameListAPI, '/api/v1.0/games/<string:teamid>', endpoint='games')
+api.add_resource(RosterListAPI, '/api/v1.0/roster/<string:teamid>')
 
 
 if __name__ == '__main__':
