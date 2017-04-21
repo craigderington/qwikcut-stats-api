@@ -420,8 +420,9 @@ class GameListAPI(Resource):
             '''
             
             # Get team id
-            teamidSql = "select teamid from teams where teamname = ?"
-            cursor = conn.query(teamidSql, teamname);
+            sql = "select teamid from teams where teamname = ?"
+            params = teamname
+            cursor = conn.query(sql, params);
             teamids = []
             for row in cursor.fetchall():
                 teamids.append(row.teamid)
@@ -435,16 +436,16 @@ class GameListAPI(Resource):
             # Get games associated with retrieved team ids
             # This placeholder code is retreived from http://stackoverflow.com/a/16732494
             placeholders = ",".join("?" * len(teamids))
-            gamesSql = "select * from games where hometeamid IN (%s) OR awayteamid IN (%s) ORDER BY gamestart" % (placeholders, placeholders)
-            params = []
-            params.extend(teamids)
-            params.extend(teamids)
-            cursor = conn.query(gamesSql, params)
+            sql2 = "select * from games where hometeamid in (%s) or awayteamid in (%s) order by gamestart" % (placeholders, placeholders)
+            params2 = []
+            params2.extend(teamids)
+            params2.extend(teamids)
+            cursor2 = conn.query(sql2, params2)
 
             # Convert to array of game object
-            columns = [column[0] for column in cursor.description]
+            columns = [column[0] for column in cursor2.description]
             games = []
-            for row in cursor.fetchall():
+            for row in cursor2.fetchall():
                 zipped = zip(columns, row)
                 d = dict(zipped)
                 games.append(d)
@@ -474,14 +475,13 @@ class RosterListAPI(Resource):
             # Use Apopka Blue Darters for testing
             
             # Get teamid
-            teamidSql = "select teamid from teams where teamname = ? "
-            cursor = conn.query(teamidSql, teamname)
+            sql = "select teamid from teams where teamname = ?"
+            params = teamname
+            cursor = conn.query(sql, params)
 
             teamids = []
             for row in cursor.fetchall():
                 teamids.append(row.teamid)
-                
-            print teamids
                 
             # Handle no team ids are found
             if len(teamids) == 0:
@@ -491,15 +491,15 @@ class RosterListAPI(Resource):
             
             # Get list of roster
             placeholders = ",".join("?" * len(teamids))
-            rosterSql = "select * from teamrosters where teamid IN (%s)" % placeholders
-            params = []
-            params.extend(teamids)
-            cursor = conn.query(rosterSql, params)
+            sql2 = "select * from teamrosters where teamid in (%s)" % placeholders
+            params2 = []
+            params2.extend(teamids)
+            cursor2 = conn.query(sql2, params2)
             
             # Convert array of roster
-            columns = [column[0] for column in cursor.description]
+            columns = [column[0] for column in cursor2.description]
             rosters = []
-            for row in cursor.fetchall():
+            for row in cursor2.fetchall():
                 zipped = zip(columns, row)
                 d = dict(zipped)
                 rosters.append(d)
